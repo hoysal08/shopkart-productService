@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -54,12 +55,13 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable String productId) {
         try {
             Product product = productService.getProductById(productId);
-            return new ResponseEntity<Product>(product, HttpStatus.OK);
+            ProductDTO productDTO = globalHelper.ProductToProductDTO(product);
+            return new ResponseEntity<>(productDTO, HttpStatus.OK);
         } catch (ProductNotFoundException e) {
-            return new ResponseEntity<Product>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -135,15 +137,23 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         List<Product> products = productService.GetAllProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+        for(Product product: products){
+            productDTOS.add(globalHelper.ProductToProductDTO(product));
+        }
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/by-category/{category}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Categories category) {
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Categories category) {
         List<Product> products = productService.GetProductByCategory(category);
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+        for(Product product: products){
+            productDTOS.add(globalHelper.ProductToProductDTO(product));
+        }
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
 }
