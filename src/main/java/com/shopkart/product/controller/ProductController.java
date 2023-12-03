@@ -6,7 +6,7 @@ import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
 import com.shopkart.product.entity.Sku;
-import com.shopkart.product.feignclient.ProductFeign;
+import com.shopkart.product.feignclient.ProductToInventoryFeign;
 import com.shopkart.product.helper.globalHelper;
 import com.shopkart.product.service.Impl.*;
 import com.shopkart.product.service.ProductService;
@@ -26,7 +26,7 @@ public class ProductController {
     private ProductService productService;
 
     @Autowired
-    ProductFeign productFeign;
+    ProductToInventoryFeign productToInventoryFeign;
 
     @PostMapping("/add")
     public ResponseEntity<String> addProduct(@RequestBody ProductDTO productDTO) {
@@ -95,7 +95,7 @@ public class ProductController {
             inventoryDto.setListingPrice(sku.getListingPrice());
             inventoryDto.setStock(sku.getStock());
             inventoryDto.setIsActive(sku.getIsActive());
-            ResponseEntity<Boolean> isUpdatedInventory = productFeign.saveInInventory(inventoryDto);
+            ResponseEntity<Boolean> isUpdatedInventory = productToInventoryFeign.saveInInventory(inventoryDto);
             if (isAdded) {
                 return new ResponseEntity<>("SKU added successfully", HttpStatus.CREATED);
             } else {
@@ -110,6 +110,23 @@ public class ProductController {
     public ResponseEntity<String> updateSKUs(@PathVariable String productId, @RequestBody List<Sku> updatedSkus) {
         try {
             boolean isUpdated = productService.UpdateSKUs(productId, updatedSkus);
+            List<InventoryDto> inventoryDtos = new ArrayList<>();
+
+            for(int i = 0 ; i < updatedSkus.size();i++){
+                InventoryDto inventoryDto = new InventoryDto();
+                inventoryDto.setProductId(productId);
+                inventoryDto.setMerchantId(updatedSkus.get(i).getMId());
+                inventoryDto.setPrice(updatedSkus.get(i).getPrice());
+                inventoryDto.setListingPrice(updatedSkus.get(i).getListingPrice());
+                inventoryDto.setStock(updatedSkus.get(i).getStock());
+                inventoryDto.setIsActive(updatedSkus.get(i).getIsActive());
+
+                inventoryDtos.add(inventoryDto);
+            }
+
+            ResponseEntity<Boolean> addedAllIncentoryDto = productToInventoryFeign.saveInventoryMultiple(inventoryDtos);
+
+
             if (isUpdated) {
                 return new ResponseEntity<>("SKUs updated successfully", HttpStatus.OK);
             } else {

@@ -4,13 +4,21 @@ import com.shopkart.product.dto.InventoryDto;
 import feign.hystrix.FallbackFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-public class ProductFeignFallback implements FallbackFactory<ProductFeign> {
+
+import java.util.List;
+
+public class ProductFeignFallback implements FallbackFactory<ProductToInventoryFeign> {
     @Override
-    public ProductFeign create(Throwable throwable) {
-        return new ProductFeign() {
+    public ProductToInventoryFeign create(Throwable throwable) {
+        return new ProductToInventoryFeign() {
 
             @Override
             public ResponseEntity<Boolean> saveInInventory(InventoryDto inventoryDto) {
+                return new ResponseEntity<>(Boolean.FALSE,HttpStatus.OK);
+            }
+
+            @Override
+            public ResponseEntity<Boolean> saveInventoryMultiple(List<InventoryDto> inventoryDtos) {
                 return new ResponseEntity<>(Boolean.FALSE,HttpStatus.OK);
             }
         };
