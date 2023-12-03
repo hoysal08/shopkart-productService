@@ -1,10 +1,12 @@
 package com.shopkart.product.controller;
 
+import com.shopkart.product.dto.InventoryDto;
 import com.shopkart.product.dto.ProductDTO;
 import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
 import com.shopkart.product.entity.Sku;
+import com.shopkart.product.feignclient.ProductFeign;
 import com.shopkart.product.helper.globalHelper;
 import com.shopkart.product.service.Impl.*;
 import com.shopkart.product.service.ProductService;
@@ -23,6 +25,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    ProductFeign productFeign;
 
     @PostMapping("/add")
     public ResponseEntity<String> addProduct(@RequestBody ProductDTO productDTO) {
@@ -83,6 +87,15 @@ public class ProductController {
     public ResponseEntity<String> addSKU(@PathVariable String productId, @RequestBody Sku sku) {
         try {
             boolean isAdded = productService.AddSKU(productId, sku);
+            productService.getProductById(productId);
+            InventoryDto inventoryDto = new InventoryDto();
+            inventoryDto.setProductId(productId);
+            inventoryDto.setMerchantId(sku.getMId());
+            inventoryDto.setPrice(sku.getPrice());
+            inventoryDto.setListingPrice(sku.getListingPrice());
+            inventoryDto.setStock(sku.getStock());
+            inventoryDto.setIsActive(sku.getIsActive());
+            ResponseEntity<Boolean> isUpdatedInventory = productFeign.saveInInventory(inventoryDto);
             if (isAdded) {
                 return new ResponseEntity<>("SKU added successfully", HttpStatus.CREATED);
             } else {
