@@ -1,12 +1,14 @@
 package com.shopkart.product.controller;
 
 import com.shopkart.product.dto.InventoryDto;
+import com.shopkart.product.dto.MerchantProductOfferingDto;
 import com.shopkart.product.dto.ProductDTO;
 import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
 import com.shopkart.product.entity.Sku;
 import com.shopkart.product.feignclient.ProductToInventoryFeign;
+import com.shopkart.product.feignclient.ProductToMerchantFeign;
 import com.shopkart.product.helper.globalHelper;
 import com.shopkart.product.service.Impl.*;
 import com.shopkart.product.service.ProductService;
@@ -27,6 +29,9 @@ public class ProductController {
 
     @Autowired
     ProductToInventoryFeign productToInventoryFeign;
+
+    @Autowired
+    ProductToMerchantFeign productToMerchantFeign;
 
     @PostMapping("/add")
     public ResponseEntity<String> addProduct(@RequestBody ProductDTO productDTO) {
@@ -96,6 +101,19 @@ public class ProductController {
             inventoryDto.setStock(sku.getStock());
             inventoryDto.setIsActive(sku.getIsActive());
             ResponseEntity<Boolean> isUpdatedInventory = productToInventoryFeign.saveInInventory(inventoryDto);
+
+            List<MerchantProductOfferingDto> merchantProductOfferingDtos = new ArrayList<>();
+            MerchantProductOfferingDto merchantProductOfferingDto = new MerchantProductOfferingDto();
+            merchantProductOfferingDto.setProductId(productId);
+            merchantProductOfferingDto.setIsActive(sku.getIsActive());
+            merchantProductOfferingDto.setNumberSold(new Long(0));
+
+            merchantProductOfferingDtos.add(merchantProductOfferingDto);
+
+            productToMerchantFeign.updateOffering(sku.getMId(), merchantProductOfferingDtos);
+
+            List<MerchantProductOfferingDto> merchantOfferingdto = new ArrayList<>();
+
             if (isAdded) {
                 return new ResponseEntity<>("SKU added successfully", HttpStatus.CREATED);
             } else {
@@ -111,7 +129,7 @@ public class ProductController {
         try {
             boolean isUpdated = productService.UpdateSKUs(productId, updatedSkus);
             List<InventoryDto> inventoryDtos = new ArrayList<>();
-
+            List<MerchantProductOfferingDto> merchantOfferingDtos = new ArrayList<>();
             for(int i = 0 ; i < updatedSkus.size();i++){
                 InventoryDto inventoryDto = new InventoryDto();
                 inventoryDto.setProductId(productId);
@@ -122,9 +140,21 @@ public class ProductController {
                 inventoryDto.setIsActive(updatedSkus.get(i).getIsActive());
 
                 inventoryDtos.add(inventoryDto);
+
+                MerchantProductOfferingDto merchantProductOfferingDto = new MerchantProductOfferingDto();
+                merchantProductOfferingDto.setProductId(productId);
+                merchantProductOfferingDto.setIsActive(updatedSkus.get(i).getIsActive());
+
+                merchantOfferingDtos.add(merchantProductOfferingDto);
+
             }
 
             ResponseEntity<Boolean> addedAllIncentoryDto = productToInventoryFeign.saveInventoryMultiple(inventoryDtos);
+
+            for( int i = 0 ; i < updatedSkus.size();i++){
+                productToMerchantFeign.updateOffering(updatedSkus.get(i).getMId(),merchantOfferingDtos);
+            }
+
 
 
             if (isUpdated) {
