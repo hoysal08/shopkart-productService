@@ -13,6 +13,6 @@ import java.util.List;
 @FeignClient(value = "product-to-merchant-feign" , url = "http://localhost:8091" , fallbackFactory =  ProductToInventoryFeignFallback.class)
 public interface ProductToMerchantFeign {
 
-    @RequestMapping(method = RequestMethod.POST , value = "/merchant/{merchantId}/update-offerings")
+    @RequestMapping(method = RequestMethod.PUT , value = "/merchant/{merchantId}/update-offerings")
     ResponseEntity<Boolean> updateOffering(@PathVariable("merchantId") String merchantId, @RequestBody List<MerchantProductOfferingDto> updateOfferingList);
 }

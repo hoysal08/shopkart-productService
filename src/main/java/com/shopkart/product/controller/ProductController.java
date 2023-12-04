@@ -215,5 +215,15 @@ public class ProductController {
         }
         return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
+    @PutMapping("/{productId}/merchant/{merchantId}/{stock}/{what}")
+    public ResponseEntity<Boolean> updateStockByProductIdandMerchantId(@PathVariable String productId ,
+           @PathVariable String merchantId , @PathVariable Long stock, @PathVariable String what){
+           Boolean isSaved = productService.updateStockByProductIdandMerchantId(productId,merchantId,stock,what);
+           System.out.println(isSaved);
+           return ResponseEntity.ok(isSaved);
+       }
+
+
+
 
 }

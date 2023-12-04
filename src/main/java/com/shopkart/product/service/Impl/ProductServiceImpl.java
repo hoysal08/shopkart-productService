@@ -199,6 +199,33 @@ public class ProductServiceImpl implements ProductService {
         return products;
     }
 
+    @Override
+    public Boolean updateStockByProductIdandMerchantId(String productId, String merchantId, Long stock , String what) {
+        Product product = productRepository.findByMerchantIdAndProductId(merchantId,productId);
+//        System.out.println(product);
+        List<Sku> skuList = product.getSkus();
+        System.out.println(skuList);
+        for( Sku sku : skuList){
+            if (sku.getMId().equals(merchantId)){
+                Long stockGet = sku.getStock();
+                if( what.equals("sold")){
+                    stockGet = stockGet - stock;
+
+                }else if (what.equals("cancelled")){
+                    stockGet = stockGet + stock;
+
+                }
+                else {
+                    continue;
+                }
+                sku.setStock(stockGet);
+                break;
+            }
+        }
+        productRepository.save(product);
+        return true;
+    }
+
     private Product getProductByMerchantIdAndProductId(String merchantId, String productId) throws ProductNotFoundException {
 
         if (merchantId == null || merchantId.isEmpty() || productId == null || productId.isEmpty()) {
