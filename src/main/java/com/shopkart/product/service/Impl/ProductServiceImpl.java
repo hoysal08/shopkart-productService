@@ -9,6 +9,7 @@ import com.shopkart.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,7 +102,14 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             Product existingProduct = getProductById(productId);
-            existingProduct.getSkus().add(sku);
+            List<Sku> existingSKU = existingProduct.getSkus();
+            if (existingSKU == null) {
+                existingSKU = new ArrayList<>();
+                existingSKU.add(sku);
+            } else {
+                existingSKU.add(sku);
+            }
+            existingProduct.setSkus(existingSKU);
             productRepository.save(existingProduct);
             return true;
         } catch (ProductNotFoundException e) {
