@@ -1,6 +1,7 @@
 package com.shopkart.product.controller;
 
 import com.shopkart.product.dto.ProductDTO;
+import com.shopkart.product.dto.ProductIdDto;
 import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
@@ -11,11 +12,13 @@ import com.shopkart.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -154,6 +157,11 @@ public class ProductController {
             productDTOS.add(globalHelper.ProductToProductDTO(product));
         }
         return new ResponseEntity<>(productDTOS, HttpStatus.OK);
+    }
+
+    @PostMapping("/byprodIds")
+    public ResponseEntity<List<ProductDTO>> getProdsbyprodIds (@RequestBody List<ProductIdDto> prodIds){
+        return  ResponseEntity.ok(productService.getProductsbyProductIds(prodIds));
     }
 
 }
