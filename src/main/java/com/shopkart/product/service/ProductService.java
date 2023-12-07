@@ -1,6 +1,8 @@
 package com.shopkart.product.service;
 
 
+import com.shopkart.product.dto.ProductDTO;
+import com.shopkart.product.dto.ProductIdDto;
 import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
@@ -32,5 +34,7 @@ public interface ProductService {
 
     List<Product> GetProductByCategory(Categories category);
 
+
+    List<ProductDTO> getProductsbyProductIds(List<ProductIdDto> productIds);
     Boolean updateStockByProductIdandMerchantId(String productId, String merchantId , Long stock , String what);
 }

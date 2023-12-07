@@ -1,11 +1,14 @@
 package com.shopkart.product.service.Impl;
 
+import com.shopkart.product.dto.ProductDTO;
+import com.shopkart.product.dto.ProductIdDto;
 import com.shopkart.product.entity.Categories;
 import com.shopkart.product.entity.Product;
 import com.shopkart.product.entity.Review;
 import com.shopkart.product.entity.Sku;
 import com.shopkart.product.repository.ProductRepository;
 import com.shopkart.product.service.ProductService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -247,6 +250,18 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return product;
+    }
+
+    @Override
+    public List<ProductDTO> getProductsbyProductIds(List<ProductIdDto> productIds){
+        List<ProductDTO> productList = new ArrayList<>();
+        for(ProductIdDto productId :  productIds){
+            Product prod = productRepository.findById(productId.getProductId()).get();
+            ProductDTO prodDto = new ProductDTO();
+            BeanUtils.copyProperties(prod,prodDto);
+            productList.add(prodDto);
+        }
+        return productList;
     }
 
 }
