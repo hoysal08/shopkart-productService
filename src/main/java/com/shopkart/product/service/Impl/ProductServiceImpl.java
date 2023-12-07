@@ -105,7 +105,14 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             Product existingProduct = getProductById(productId);
-            existingProduct.getSkus().add(sku);
+            List<Sku> existingSKU = existingProduct.getSkus();
+            if (existingSKU == null) {
+                existingSKU = new ArrayList<>();
+                existingSKU.add(sku);
+            } else {
+                existingSKU.add(sku);
+            }
+            existingProduct.setSkus(existingSKU);
             productRepository.save(existingProduct);
             return true;
         } catch (ProductNotFoundException e) {
@@ -201,6 +208,33 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> GetProductByCategory(Categories category) {
         List<Product> products = productRepository.findByCategory(category);
         return products;
+    }
+
+    @Override
+    public Boolean updateStockByProductIdandMerchantId(String productId, String merchantId, Long stock , String what) {
+        Product product = productRepository.findByMerchantIdAndProductId(merchantId,productId);
+//        System.out.println(product);
+        List<Sku> skuList = product.getSkus();
+        System.out.println(skuList);
+        for( Sku sku : skuList){
+            if (sku.getMId().equals(merchantId)){
+                Long stockGet = sku.getStock();
+                if( what.equals("sold")){
+                    stockGet = stockGet - stock;
+
+                }else if (what.equals("cancelled")){
+                    stockGet = stockGet + stock;
+
+                }
+                else {
+                    continue;
+                }
+                sku.setStock(stockGet);
+                break;
+            }
+        }
+        productRepository.save(product);
+        return true;
     }
 
     private Product getProductByMerchantIdAndProductId(String merchantId, String productId) throws ProductNotFoundException {

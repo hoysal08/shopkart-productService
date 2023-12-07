@@ -34,5 +34,7 @@ public interface ProductService {
 
     List<Product> GetProductByCategory(Categories category);
 
+
     List<ProductDTO> getProductsbyProductIds(List<ProductIdDto> productIds);
+    Boolean updateStockByProductIdandMerchantId(String productId, String merchantId , Long stock , String what);
 }
